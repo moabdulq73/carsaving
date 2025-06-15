@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Savings Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .progress-section {
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .balance {
+            font-size: 48px;
+            font-weight: 800;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .goal-info {
+            color: #7f8c8d;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #ecf0f1;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #27ae60, #2ecc71);
+            border-radius: 6px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+        }
+
+        .target-date {
+            background: #e8f5e8;
+            color: #27ae60;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .controls {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .sync-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .sync-btn {
+            padding: 12px 16px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .backup-btn {
+            background: #3498db;
+            color: white;
+        }
+
+        .backup-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .restore-btn {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .restore-btn:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .input-group input {
+            padding: 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-add {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-add:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+
+        .btn-subtract {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-subtract:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .settings {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .settings h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 18px;
+        }
+
+        .setting-item {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .setting-item label {
+            font-weight: 500;
+            color: #34495e;
+        }
+
+        .setting-item input, .setting-item select {
+            padding: 8px 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 14px;
+            width: 120px;
+        }
+
+        .transactions {
+            padding: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .transactions h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 18px;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .transaction-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .transaction-amount {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .transaction-amount.positive {
+            color: #27ae60;
+        }
+
+        .transaction-amount.negative {
+            color: #e74c3c;
+        }
+
+        .transaction-date {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 2px;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .modal-header {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .balance {
+                font-size: 36px;
+            }
+            
+            .container {
+                margin: 5px;
+                border-radius: 15px;
+            }
+            
+            .sync-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚗 Car Savings</h1>
+            <p>Track your progress to $16,000</p>
+        </div>
+
+        <div class="progress-section">
+            <div class="balance" id="currentBalance">$7,000</div>
+            <div class="goal-info">Goal: $16,000</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">0% Complete</div>
+            <div class="target-date" id="targetDate">Target: Calculating...</div>
+        </div>
+
+        <div class="controls">
+            <div class="sync-buttons">
+                <button class="sync-btn backup-btn" onclick="backupData()">📤 Backup to Drive</button>
+                <button class="sync-btn restore-btn" onclick="restoreData()">📥 Restore from Drive</button>
+            </div>
+
+            <div class="input-group">
+                <input type="number" id="transactionAmount" placeholder="Enter amount..." step="0.01">
+                <button class="btn btn-add" onclick="addTransaction('deposit')">+ Add</button>
+            </div>
+            <div class="input-group">
+                <input type="number" id="expenseAmount" placeholder="Enter expense..." step="0.01">
+                <button class="btn btn-subtract" onclick="addTransaction('expense')">- Expense</button>
+            </div>
+        </div>
+
+        <div class="settings">
+            <h3>⚙️ Settings</h3>
+            <div class="setting-item">
+                <label>Weekly Investment:</label>
+                <input type="number" id="weeklyInvestment" value="150" onchange="updateSettings()">
+            </div>
+            <div class="setting-item">
+                <label>Monthly Expenses:</label>
+                <input type="number" id="monthlyExpenses" value="325" onchange="updateSettings()">
+            </div>
+            <div class="setting-item">
+                <label>Work Mode:</label>
+                <select id="workMode" onchange="updateSettings()">
+                    <option value="fulltime">Full-time (8 weeks)</option>
+                    <option value="parttime">Part-time (ongoing)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="transactions">
+            <h3>📊 Recent Transactions</h3>
+            <div id="transactionsList"></div>
+        </div>
+    </div>
+
+    <!-- Backup Modal -->
+    <div id="backupModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">📤 Backup Your Data</div>
+            <p>Your backup is ready! Choose how to save it:</p>
+            <textarea id="backupText" readonly style="width: 100%; height: 100px; margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 5px;"></textarea>
+            <div class="modal-buttons">
+                <button class="btn btn-add" onclick="downloadBackup()">💾 Download File</button>
+                <button class="btn" onclick="shareBackup()">📱 Share to Drive</button>
+                <button class="btn" onclick="closeModal('backupModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Restore Modal -->
+    <div id="restoreModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">📥 Restore Your Data</div>
+            <p>Choose a backup file or paste your backup data:</p>
+            <input type="file" id="fileInput" class="file-input" accept=".json,.txt" onchange="handleFileSelect()">
+            <button class="btn btn-add" onclick="document.getElementById('fileInput').click()">📁 Select File</button>
+            <div style="margin: 15px 0; text-align: center;">- OR -</div>
+            <textarea id="restoreText" placeholder="Paste your backup data here..." style="width: 100%; height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;"></textarea>
+            <div class="modal-buttons">
+                <button class="btn btn-add" onclick="restoreFromText()">✅ Restore Data</button>
+                <button class="btn" onclick="closeModal('restoreModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data structure
+        let data = {
+            currentBalance: 7000,
+            goal: 16000,
+            weeklyInvestments: 150,
+            monthlyExpenses: 325,
+            workMode: 'fulltime',
+            transactions: []
+        };
+
+        // Load data on page load
+        function loadData() {
+            const saved = localStorage.getItem('carSavingsData');
+            if (saved) {
+                data = JSON.parse(saved);
+                updateSettingsDisplay();
+            }
+            updateDisplay();
+        }
+
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('carSavingsData', JSON.stringify(data));
+        }
+
+        // Update settings display
+        function updateSettingsDisplay() {
+            document.getElementById('weeklyInvestment').value = data.weeklyInvestments;
+            document.getElementById('monthlyExpenses').value = data.monthlyExpenses;
+            document.getElementById('workMode').value = data.workMode;
+        }
+
+        // Update settings from inputs
+        function updateSettings() {
+            data.weeklyInvestments = parseFloat(document.getElementById('weeklyInvestment').value) || 0;
+            data.monthlyExpenses = parseFloat(document.getElementById('monthlyExpenses').value) || 0;
+            data.workMode = document.getElementById('workMode').value;
+            saveData();
+            updateDisplay();
+        }
+
+        // Add transaction
+        function addTransaction(type) {
+            const amountInput = type === 'deposit' ? 'transactionAmount' : 'expenseAmount';
+            const amount = parseFloat(document.getElementById(amountInput).value);
+            
+            if (!amount || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+
+            const transaction = {
+                id: Date.now(),
+                amount: type === 'deposit' ? amount : -amount,
+                type: type,
+                date: new Date().toLocaleDateString(),
+                timestamp: Date.now()
+            };
+
+            data.transactions.unshift(transaction);
+            data.currentBalance += transaction.amount;
+            
+            // Clear input
+            document.getElementById(amountInput).value = '';
+            
+            saveData();
+            updateDisplay();
+        }
+
+        // Delete transaction
+        function deleteTransaction(id) {
+            const transaction = data.transactions.find(t => t.id === id);
+            if (transaction) {
+                data.currentBalance -= transaction.amount;
+                data.transactions = data.transactions.filter(t => t.id !== id);
+                saveData();
+                updateDisplay();
+            }
+        }
+
+        // Calculate target date
+        function calculateTargetDate() {
+            const remaining = data.goal - data.currentBalance;
+            if (remaining <= 0) return "🎉 Goal Reached!";
+
+            const weeklyNet = data.weeklyInvestments - (data.monthlyExpenses / 4.33);
+            if (weeklyNet <= 0) return "Adjust your budget";
+
+            const weeksNeeded = Math.ceil(remaining / weeklyNet);
+            const targetDate = new Date();
+            targetDate.setDate(targetDate.getDate() + (weeksNeeded * 7));
+
+            return `Target: ${targetDate.toLocaleDateString()}`;
+        }
+
+        // Update display
+        function updateDisplay() {
+            // Update balance
+            document.getElementById('currentBalance').textContent = `$${data.currentBalance.toLocaleString()}`;
+            
+            // Update progress bar
+            const progress = Math.min((data.currentBalance / data.goal) * 100, 100);
+            document.getElementById('progressFill').style.width = `${progress}%`;
+            document.getElementById('progressText').textContent = `${Math.round(progress)}% Complete`;
+            
+            // Update target date
+            document.getElementById('targetDate').textContent = calculateTargetDate();
+            
+            // Update transactions list
+            updateTransactionsList();
+        }
+
+        // Update transactions list
+        function updateTransactionsList() {
+            const container = document.getElementById('transactionsList');
+            const recentTransactions = data.transactions.slice(0, 10);
+            
+            if (recentTransactions.length === 0) {
+                container.innerHTML = '<p style="color: #7f8c8d; text-align: center;">No transactions yet</p>';
+                return;
+            }
+
+            container.innerHTML = recentTransactions.map(transaction => `
+                <div class="transaction-item">
+                    <div class="transaction-info">
+                        <div class="transaction-amount ${transaction.amount > 0 ? 'positive' : 'negative'}">
+                            ${transaction.amount > 0 ? '+' : ''}$${Math.abs(transaction.amount).toLocaleString()}
+                        </div>
+                        <div class="transaction-date">${transaction.date}</div>
+                    </div>
+                    <button class="delete-btn" onclick="deleteTransaction(${transaction.id})">×</button>
+                </div>
+            `).join('');
+        }
+
+        // Backup functionality
+        function backupData() {
+            const backupString = JSON.stringify(data, null, 2);
+            document.getElementById('backupText').value = backupString;
+            document.getElementById('backupModal').style.display = 'block';
+        }
+
+        function downloadBackup() {
+            const backupString = document.getElementById('backupText').value;
+            const blob = new Blob([backupString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `car-savings-backup-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            closeModal('backupModal');
+        }
+
+        function shareBackup() {
+            const backupString = document.getElementById('backupText').value;
+            
+            if (navigator.share) {
+                // Mobile sharing
+                const blob = new Blob([backupString], { type: 'application/json' });
+                const file = new File([blob], `car-savings-backup-${new Date().toISOString().split('T')[0]}.json`, { type: 'application/json' });
+                
+                navigator.share({
+                    title: 'Car Savings Backup',
+                    text: 'My car savings tracker backup',
+                    files: [file]
+                }).catch(err => {
+                    // Fallback to copy to clipboard
+                    copyToClipboard(backupString);
+                });
+            } else {
+                // Desktop fallback
+                copyToClipboard(backupString);
+            }
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Backup data copied to clipboard! You can paste it in Google Drive or send via email.');
+                closeModal('backupModal');
+            }).catch(() => {
+                alert('Please manually copy the backup data from the text box above.');
+            });
+        }
+
+        // Restore functionality
+        function restoreData() {
+            document.getElementById('restoreModal').style.display = 'block';
+        }
+
+        function handleFileSelect() {
+            const file = document.getElementById('fileInput').files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('restoreText').value = e.target.result;
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function restoreFromText() {
+            const restoreText = document.getElementById('restoreText').value.trim();
+            if (!restoreText) {
+                alert('Please select a file or paste backup data');
+                return;
+            }
+
+            try {
+                const restoredData = JSON.parse(restoreText);
+                
+                // Validate restored data
+                if (!restoredData.hasOwnProperty('currentBalance') || !restoredData.hasOwnProperty('transactions')) {
+                    throw new Error('Invalid backup format');
+                }
+
+                // Restore data
+                data = restoredData;
+                saveData();
+                updateSettingsDisplay();
+                updateDisplay();
+                
+                alert('Data restored successfully!');
+                closeModal('restoreModal');
+                
+                // Clear restore form
+                document.getElementById('restoreText').value = '';
+                document.getElementById('fileInput').value = '';
+                
+            } catch (error) {
+                alert('Error restoring data. Please check your backup file format.');
+                console.error('Restore error:', error);
+            }
+        }
+
+        // Modal functions
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // Initialize app
+        loadData();
+    </script>
+</body>
+</html>
