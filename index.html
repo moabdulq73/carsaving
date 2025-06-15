@@ -258,6 +258,8 @@
                 <button class="btn active" id="fullTimeBtn" onclick="toggleWorkMode('fulltime')">Full-Time Mode</button>
                 <button class="btn" id="partTimeBtn" onclick="toggleWorkMode('parttime')">Part-Time Mode</button>
                 <button class="btn" onclick="toggleSettings()">⚙️ Settings</button>
+                <button class="btn" onclick="exportData()">📤 Backup Data</button>
+                <button class="btn" onclick="importData()">📥 Restore Data</button>
             </div>
 
             <div class="settings" id="settingsPanel">
@@ -452,23 +454,77 @@
             });
         }
 
-        // Delete transaction
-        function deleteTransaction(id) {
-            const transaction = appState.transactions.find(t => t.id === id);
-            if (!transaction) return;
+        // Export data for backup
+        function exportData() {
+            const dataStr = JSON.stringify(appState, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
             
-            if (confirm('Are you sure you want to delete this transaction?')) {
-                // Reverse the transaction
-                if (transaction.type === 'deposit') {
-                    appState.currentBalance -= transaction.amount;
-                } else {
-                    appState.currentBalance += transaction.amount;
-                }
+            if (navigator.share && /mobile|android|iphone|ipad/i.test(navigator.userAgent)) {
+                // Mobile sharing
+                const file = new File([dataBlob], 'car-savings-backup.json', {type: 'application/json'});
+                navigator.share({
+                    files: [file],
+                    title: 'Car Savings Backup',
+                    text: 'Backup of your car savings data'
+                }).catch(err => {
+                    // Fallback to copy to clipboard
+                    copyToClipboard(dataStr);
+                });
+            } else {
+                // Desktop download
+                const url = window.URL.createObjectURL(dataBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'car-savings-backup.json';
+                a.click();
+                window.URL.revokeObjectURL(url);
+            }
+        }
+
+        // Import data from backup
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
                 
-                appState.transactions = appState.transactions.filter(t => t.id !== id);
-                updateDisplay();
-                loadTransactions();
-                saveData();
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const importedData = JSON.parse(e.target.result);
+                        if (confirm('This will replace all your current data. Continue?')) {
+                            appState = { ...appState, ...importedData };
+                            updateDisplay();
+                            loadTransactions();
+                            saveData();
+                            alert('Data successfully restored!');
+                        }
+                    } catch (error) {
+                        alert('Invalid backup file. Please select a valid backup.');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // Copy to clipboard fallback
+        function copyToClipboard(text) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('Data copied to clipboard! Save this text and paste it when restoring on another device.');
+                });
+            } else {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('Data copied to clipboard! Save this text and paste it when restoring on another device.');
             }
         }
 
